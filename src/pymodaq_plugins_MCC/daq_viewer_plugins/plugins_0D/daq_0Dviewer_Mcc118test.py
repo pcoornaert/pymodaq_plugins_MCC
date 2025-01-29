@@ -102,9 +102,9 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         
         self.ini_detector_init(slave_controller=controller)
 
-        if self.is_master:
-            self.controller = PythonWrapperOfYourInstrument()  #instantiate you driver with whatever arguments are needed
-            self.controller.open_communication() # call eventual methods
+        # if self.is_master:
+        #     self.controller = PythonWrapperOfYourInstrument()  #instantiate you driver with whatever arguments are needed
+        #     self.controller.open_communication() # call eventual methods
 
         try:
              # Select an MCC 118 HAT device to use.
