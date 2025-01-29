@@ -113,15 +113,15 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         except (HatError, ValueError) as err:
             print('\n', err)
 
-        # TODO for your custom plugin (optional) initialize viewers panel with the future type of data
-        self.dte_signal_temp.emit(DataToExport(name='myplugin',
-                                               data=[DataFromPlugins(name='Mock1',
-                                                                    data=[np.array([0]), np.array([0])],
-                                                                    dim='Data0D',
-                                                                    labels=['Mock1', 'label2'])]))
+        # # TODO for your custom plugin (optional) initialize viewers panel with the future type of data
+        # self.dte_signal_temp.emit(DataToExport(name='myplugin',
+        #                                        data=[DataFromPlugins(name='Mock1',
+        #                                                             data=[np.array([0]), np.array([0])],
+        #                                                             dim='Data0D',
+        #                                                             labels=['Mock1', 'label2'])]))
 
-        info = "Whatever info you want to log"
-        initialized = self.controller.a_method_or_atttribute_to_check_if_init()  # TODO
+        info = "mcc118 initialized at address 0"
+        initialized = self.controller._initialized()
         return info, initialized
 
     def close(self):
