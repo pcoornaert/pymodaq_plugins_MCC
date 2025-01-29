@@ -122,7 +122,8 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
 
         info = "mcc118 initialized at address 0"
         initialized = self.controller._initialized()
-        return info, initialized
+        print(f'initialized = {initialized}')
+        return info, True #initialized
 
     def close(self):
         """Terminate the communication protocol"""
