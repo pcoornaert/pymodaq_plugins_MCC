@@ -1,0 +1,5 @@
+[pymodaq.instruments]
+Mcc118test = pymodaq_plugins_Mcc118test
+
+[pymodaq.plugins]
+Mcc118test = pymodaq_plugins_Mcc118test
