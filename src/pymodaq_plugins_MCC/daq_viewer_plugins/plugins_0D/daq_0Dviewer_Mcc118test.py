@@ -121,7 +121,7 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         #                                                             labels=['Mock1', 'label2'])]))
 
         info = "mcc118 initialized at address 0"
-        initialized = self.controller._initialized()
+        initialized = self.controller._initialized
         print(f'initialized = {initialized}')
         return info, True #initialized
 
