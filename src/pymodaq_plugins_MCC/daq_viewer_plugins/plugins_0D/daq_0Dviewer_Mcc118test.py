@@ -60,14 +60,9 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
     #         print('\n', err)    
         
     def ini_attributes(self):
-       
-        try:
-             # Select an MCC 118 HAT device to use.
-            address = select_hat_device(HatIDs.MCC_118)
-            self.controller: mcc118 = mcc118(address)
-        except (HatError, ValueError) as err:
-            print('\n', err)
-        
+
+        self.controller: mcc118 = None
+
         #TODO declare here attributes you want/need to init with a default value
         pass
         
@@ -80,12 +75,12 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         param: Parameter
             A given parameter (within detector_settings) whose value has been changed by the user
         """
-
-        if param.name() == "scan_rate":
-           actual_scan_rate = self.controller.a_in_scan_actual_rate(num_channels, param)
-           self.controller.your_method_to_apply_this_param_change()  # when writing your own plugin replace this line
+        pass
+        # if param.name() == "scan_rate":
+        #    actual_scan_rate = self.controller.a_in_scan_actual_rate(num_channels, param)
+        #    self.controller.your_method_to_apply_this_param_change()  # when writing your own plugin replace this line
 #        elif ...
-        ##
+        ##  
 
     def ini_detector(self, controller=None):
         """Detector communication initialization
@@ -102,19 +97,21 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         initialized: bool
             False if initialization failed otherwise True
         """
-        # # Initialize the detector hardware
-        # if self.controller is None:
-        #     self.board = mcc118(0)  # Initialize MCC118 on address 0
-        #     self.controller = self.board
+        
         print('ini detector tried')
-        # info = f"Connected to MCC118 - Serial: {self.board.serial()}"
-        # self.emit_status(ThreadCommand('update_status', [info]))
-        raise NotImplemented  # TODO when writing your own plugin remove this line and modify the one below
+        
         self.ini_detector_init(slave_controller=controller)
 
         if self.is_master:
             self.controller = PythonWrapperOfYourInstrument()  #instantiate you driver with whatever arguments are needed
             self.controller.open_communication() # call eventual methods
+
+        try:
+             # Select an MCC 118 HAT device to use.
+            address = select_hat_device(HatIDs.MCC_118)
+            self.controller: mcc118 = mcc118(address)
+        except (HatError, ValueError) as err:
+            print('\n', err)
 
         # TODO for your custom plugin (optional) initialize viewers panel with the future type of data
         self.dte_signal_temp.emit(DataToExport(name='myplugin',
@@ -129,8 +126,10 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
 
     def close(self):
         """Terminate the communication protocol"""
-        ## TODO for your custom plugin
-        raise NotImplemented  # when writing your own plugin remove this line
+
+        self.controller.__del__()  # when writing your own plugin replace this line
+        self.emit_status(ThreadCommand('Update_Status', ['close comm']))
+
         #  self.controller.your_method_to_terminate_the_communication()  # when writing your own plugin replace this line
 
     def grab_data(self, Naverage=1, **kwargs):
@@ -188,8 +187,9 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
     def stop(self):
         """Stop the current grab hardware wise if necessary"""
         
-        self.controller.__del__()  # when writing your own plugin replace this line
-        self.emit_status(ThreadCommand('Update_Status', ['Some info you want to log']))
+        self.controller.a_in_scan_stop()
+        self.controller.a_in_scan_cleanup()
+        self.emit_status(ThreadCommand('Update_Status', ['close comm']))
         ##############################
         return ''
 
