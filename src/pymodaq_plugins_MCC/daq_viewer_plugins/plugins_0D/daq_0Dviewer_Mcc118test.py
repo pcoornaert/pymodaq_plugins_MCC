@@ -113,7 +113,7 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         except (HatError, ValueError) as err:
             print('\n', err)
 
-        print(self.settings['name'])
+        print(self.settings)
         
         self.controller.a_in_scan_start(channel_mask, samples_per_channel, self.settings['sample_rate'], options)
 
