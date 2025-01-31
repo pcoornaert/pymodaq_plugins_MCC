@@ -153,7 +153,7 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
 
         total_samples_read = 0
         # read_request_size = READ_ALL_AVAILABLE
-        read_request_size = 10
+        read_request_size = 1
 
         # When doing a continuous scan, the timeout value will be ignored in the
         # call to a_in_scan_read because we will be requesting that all available
@@ -165,7 +165,7 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         y_data = read_result.data  # Single value for 0D viewer
         
         self.dte_signal.emit(DataToExport(name="MCC118test",data=[DataFromPlugins(name="Voltage",data=y_data,dim="Data0D",labels=['hello this is a label'])]))
-        sleep(0.1)
+        # sleep(0.1)
 
         # synchrone version (blocking function)
         #not sure it is synchrone 
