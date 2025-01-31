@@ -113,9 +113,9 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         except (HatError, ValueError) as err:
             print('\n', err)
 
-        print(self.settings)
+        print(self.settings['detector_settings'])
         
-        self.controller.a_in_scan_start(channel_mask, samples_per_channel, self.settings['sample_rate'], options)
+        self.controller.a_in_scan_start(channel_mask, samples_per_channel, self.settings['scan_rate'], options)
 
         # # TODO for your custom plugin (optional) initialize viewers panel with the future type of data
         # self.dte_signal_temp.emit(DataToExport(name='myplugin',
