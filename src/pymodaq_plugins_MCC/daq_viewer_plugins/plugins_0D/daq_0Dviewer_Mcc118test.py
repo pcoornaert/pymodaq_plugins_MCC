@@ -1,3 +1,4 @@
+from time import sleep
 import numpy as np
 from pymodaq.utils.daq_utils import ThreadCommand
 from pymodaq.utils.data import DataFromPlugins, DataToExport
@@ -151,7 +152,8 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         ## TODO for your custom plugin: you should choose EITHER the synchrone or the asynchrone version following
 
         total_samples_read = 0
-        read_request_size = READ_ALL_AVAILABLE
+        # read_request_size = READ_ALL_AVAILABLE
+        read_request_size = 10
 
         # When doing a continuous scan, the timeout value will be ignored in the
         # call to a_in_scan_read because we will be requesting that all available
@@ -161,9 +163,9 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         read_result = self.controller.a_in_scan_read_numpy(read_request_size, timeout)
 
         y_data = read_result.data  # Single value for 0D viewer
-        print(f'sizedata ={len(y_data)}')
-        self.dte_signal.emit(DataToExport(name="MCC118card",data=[DataFromPlugins(name="Voltage",data=y_data,dim="Data0D",labels=['hello this is a label'])]))
-
+        
+        self.dte_signal.emit(DataToExport(name="MCC118test",data=[DataFromPlugins(name="Voltage",data=y_data,dim="Data0D",labels=['hello this is a label'])]))
+        sleep(0.1)
 
         # synchrone version (blocking function)
         #not sure it is synchrone 
@@ -177,8 +179,8 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         #########################################################
 
         # asynchrone version (non-blocking function with callback)
-        raise NotImplemented  # when writing your own plugin remove this line
-        self.controller.your_method_to_start_a_grab_snap(self.callback)  # when writing your own plugin replace this line
+        # raise NotImplemented  # when writing your own plugin remove this line
+        # self.controller.your_method_to_start_a_grab_snap(self.callback)  # when writing your own plugin replace this line
         #########################################################
 
 
