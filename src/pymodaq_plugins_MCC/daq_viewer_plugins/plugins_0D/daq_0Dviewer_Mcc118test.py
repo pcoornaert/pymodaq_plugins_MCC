@@ -162,7 +162,7 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
 
         y_data = read_result.data  # Single value for 0D viewer
         print(f'sizedata ={len(y_data)}')
-        self.dte_signal.emit(DataToExport(name="DistanceSensor",data=[DataFromPlugins(name="Distance",data=y_data,dim="Data0D",labels=[self.settings["y_label"]])]))
+        self.dte_signal.emit(DataToExport(name="MCC118card",data=[DataFromPlugins(name="Voltage",data=y_data,dim="Data0D",labels=['hello this is a label'])]))
 
 
         # synchrone version (blocking function)
