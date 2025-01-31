@@ -161,7 +161,7 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         read_result = self.controller.a_in_scan_read_numpy(read_request_size, timeout)
 
         y_data = read_result.data  # Single value for 0D viewer
-        print(f'sizedata ={y_data.shape()}')
+        print(f'sizedata ={len(y_data)}')
         self.dte_signal.emit(DataToExport(name="DistanceSensor",data=[DataFromPlugins(name="Distance",data=y_data,dim="Data0D",labels=[self.settings["y_label"]])]))
 
 
