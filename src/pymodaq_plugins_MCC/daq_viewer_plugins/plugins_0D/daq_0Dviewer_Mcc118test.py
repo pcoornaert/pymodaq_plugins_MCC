@@ -94,9 +94,9 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
             try:
                 channel = 0  # Assuming channel 0 for calibration
                 slope = self.settings['calibration_gain']
-                offset = self.settings['calibration_offset']*4096/20
-                self.controller.calibration_coefficient_write(channel, slope, offset)
-                print(f"Calibration coefficients set for channel {channel}: Slope={slope}, Offset={offset}")
+                offset = self.settings['calibration_offset']
+                self.controller.calibration_coefficient_write(channel, slope, offset*4096/20)
+                print(f"Calibration coefficients set for channel {channel}: Slope={slope}, Offset={offset} (V)")
             except HatError as err:
                 print(f"Error setting calibration coefficients: {err}")
 
@@ -158,7 +158,7 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
             channel = 0  # Assuming channel 0 for initial calibration
             slope = self.settings['calibration_gain']
             offset = self.settings['calibration_offset']
-            self.controller.calibration_coefficient_write(channel, slope, offset)
+            self.controller.calibration_coefficient_write(channel, slope, offset*4096/20)
             print(f"Initial calibration coefficients set for channel {channel}: Slope={slope}, Offset={offset}")
         except HatError as err:
             print(f"Error during initial calibration: {err}")
