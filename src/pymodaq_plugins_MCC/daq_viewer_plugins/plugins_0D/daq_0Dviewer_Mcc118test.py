@@ -6,7 +6,7 @@ from pymodaq.control_modules.viewer_utility_classes import DAQ_Viewer_base, como
 from pymodaq.utils.parameter import Parameter
 
 from daqhats import mcc118, OptionFlags, HatIDs, HatError
-from hardware.daqhats_utils import select_hat_device, enum_mask_to_string, \
+from pymodaq_plugins_MCC.hardware.daqhats_utils import select_hat_device, enum_mask_to_string, \
     chan_list_to_mask
 # pymodaq_plugins_MCC.
 class PythonWrapperOfYourInstrument:
