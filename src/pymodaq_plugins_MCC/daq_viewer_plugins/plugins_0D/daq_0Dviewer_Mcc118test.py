@@ -6,9 +6,9 @@ from pymodaq.control_modules.viewer_utility_classes import DAQ_Viewer_base, como
 from pymodaq.utils.parameter import Parameter
 
 from daqhats import mcc118, OptionFlags, HatIDs, HatError
-from pymodaq_plugins_MCC.hardware.daqhats_utils import select_hat_device, enum_mask_to_string, \
+from hardware.daqhats_utils import select_hat_device, enum_mask_to_string, \
     chan_list_to_mask
-
+# pymodaq_plugins_MCC.
 class PythonWrapperOfYourInstrument:
     #  TODO Replace this fake class with the import of the real python wrapper of your instrument
     pass
@@ -20,7 +20,7 @@ num_channels = len(channels)
 
 samples_per_channel = 0
 
-options = OptionFlags.CONTINUOUS
+options = OptionFlags.CONTINUOUS | OptionFlags.NOCALIBRATEDATA
 
 READ_ALL_AVAILABLE = -1
 
@@ -149,7 +149,7 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         kwargs: dict
             others optionals arguments
         """
-        ## TODO for your custom plugin: you should choose EITHER the synchrone or the asynchrone version following
+        
 
         total_samples_read = 0
         # read_request_size = READ_ALL_AVAILABLE
