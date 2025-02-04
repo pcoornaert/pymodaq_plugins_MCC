@@ -20,7 +20,7 @@ num_channels = len(channels)
 
 samples_per_channel = 0
 
-options = OptionFlags.CONTINUOUS #| OptionFlags.NOCALIBRATEDATA
+options = OptionFlags.CONTINUOUS | OptionFlags.DEFAULT #| OptionFlags.NOCALIBRATEDATA
 
 READ_ALL_AVAILABLE = -1
 
