@@ -100,18 +100,18 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
             except HatError as err:
                 print(f"Error setting calibration coefficients: {err}")
 
-    def get_option_flags(self):
-        """Helper to convert user selection to OptionFlags."""
-        selected_flags = self.settings['option_flags']
-        flag_mapping = {
-            'DEFAULT': OptionFlags.DEFAULT,
-            'NOCALIBRATEDATA': OptionFlags.NOCALIBRATEDATA,
-            'CONTINUOUS': OptionFlags.CONTINUOUS
-        }
-        combined_flags = OptionFlags.DEFAULT
-        for flag_name in selected_flags:
-            combined_flags |= flag_mapping[flag_name]
-        return combined_flags
+    # def get_option_flags(self):
+    #     """Helper to convert user selection to OptionFlags."""
+    #     selected_flags = self.settings['option_flags']
+    #     flag_mapping = {
+    #         'DEFAULT': OptionFlags.DEFAULT,
+    #         'NOCALIBRATEDATA': OptionFlags.NOCALIBRATEDATA,
+    #         'CONTINUOUS': OptionFlags.CONTINUOUS
+    #     }
+    #     combined_flags = OptionFlags.DEFAULT
+    #     for flag_name in selected_flags:
+    #         combined_flags |= flag_mapping[flag_name]
+    #     return combined_flags
         
 
     def ini_detector(self, controller=None):
@@ -163,7 +163,7 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         except HatError as err:
             print(f"Error during initial calibration: {err}")
 
-        options = self.get_option_flags()
+        # options = self.get_option_flags()
         self.controller.a_in_scan_start(channel_mask, samples_per_channel, self.settings['scan_rate'], options)
 
         # TODO for your custom plugin (optional) initialize viewers panel with the future type of data
