@@ -51,7 +51,10 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
     params = comon_parameters+[
         {'title': 'desired scan rate (Hz)', 'name': 'scan_rate', 'type': 'int', 'value': 1000, 'default': 1000, 'min': 0},
         {'title': 'Calibration Offset (V)', 'name': 'calibration_offset', 'type': 'float', 'value': 0.0, 'default': 0.0},
-        {'title': 'Calibration Gain', 'name': 'calibration_gain', 'type': 'float', 'value': 1.0, 'default': 1.0}
+        {'title': 'Calibration Gain', 'name': 'calibration_gain', 'type': 'float', 'value': 1.0, 'default': 1.0},
+        {'title': 'Option Flags', 'name': 'option_flags', 'type': 'list', 'values': [
+            'DEFAULT', 'NOCALIBRATEDATA', 'CONTINUOUS'
+        ], 'value': ['DEFAULT'], 'default': ['DEFAULT'], 'limits': ['DEFAULT', 'NOCALIBRATEDATA', 'CONTINUOUS']}
     ]
 
     # def __init__(self, *args, **kwargs):
@@ -91,11 +94,24 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
             try:
                 channel = 0  # Assuming channel 0 for calibration
                 slope = self.settings['calibration_gain']
-                offset = self.settings['calibration_offset']
+                offset = self.settings['calibration_offset']*4096/20
                 self.controller.calibration_coefficient_write(channel, slope, offset)
                 print(f"Calibration coefficients set for channel {channel}: Slope={slope}, Offset={offset}")
             except HatError as err:
                 print(f"Error setting calibration coefficients: {err}")
+
+    def get_option_flags(self):
+        """Helper to convert user selection to OptionFlags."""
+        selected_flags = self.settings['option_flags']
+        flag_mapping = {
+            'DEFAULT': OptionFlags.DEFAULT,
+            'NOCALIBRATEDATA': OptionFlags.NOCALIBRATEDATA,
+            'CONTINUOUS': OptionFlags.CONTINUOUS
+        }
+        combined_flags = OptionFlags.DEFAULT
+        for flag_name in selected_flags:
+            combined_flags |= flag_mapping[flag_name]
+        return combined_flags
         
 
     def ini_detector(self, controller=None):
@@ -147,6 +163,7 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         except HatError as err:
             print(f"Error during initial calibration: {err}")
 
+        options = self.get_option_flags()
         self.controller.a_in_scan_start(channel_mask, samples_per_channel, self.settings['scan_rate'], options)
 
         # TODO for your custom plugin (optional) initialize viewers panel with the future type of data
