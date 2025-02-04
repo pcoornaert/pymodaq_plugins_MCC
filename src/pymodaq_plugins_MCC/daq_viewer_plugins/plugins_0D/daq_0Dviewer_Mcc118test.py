@@ -20,7 +20,7 @@ num_channels = len(channels)
 
 samples_per_channel = 0
 
-options = OptionFlags.CONTINUOUS | OptionFlags.NOCALIBRATEDATA
+options = OptionFlags.CONTINUOUS #| OptionFlags.NOCALIBRATEDATA
 
 READ_ALL_AVAILABLE = -1
 
@@ -48,7 +48,11 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
 
     """
 
-    params = comon_parameters+[{'title': 'desired scan rate (Hz)', 'name': 'scan_rate', 'type': 'int', 'value': 1000, 'default': 1000, 'min': 0},]
+    params = comon_parameters+[
+        {'title': 'desired scan rate (Hz)', 'name': 'scan_rate', 'type': 'int', 'value': 1000, 'default': 1000, 'min': 0},
+        {'title': 'Calibration Offset (V)', 'name': 'calibration_offset', 'type': 'float', 'value': 0.0, 'default': 0.0},
+        {'title': 'Calibration Gain', 'name': 'calibration_gain', 'type': 'float', 'value': 1.0, 'default': 1.0}
+    ]
 
     # def __init__(self, *args, **kwargs):
     #     super().__init__(*args, **kwargs)
@@ -76,12 +80,23 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         param: Parameter
             A given parameter (within detector_settings) whose value has been changed by the user
         """
-        pass
-        # if param.name() == "scan_rate":
-        #    actual_scan_rate = self.controller.a_in_scan_actual_rate(num_channels, param)
-        #    self.controller.your_method_to_apply_this_param_change()  # when writing your own plugin replace this line
-#        elif ...
-        ##  
+        
+        if param.name() == "scan_rate":
+            scan_rate = param.value()
+            if scan_rate > 0 and self.controller:
+                self.controller.a_in_scan_actual_rate(num_channels, scan_rate)
+                print(f"Scan rate set to {scan_rate} Hz")
+
+        if param.name() in ["calibration_gain", "calibration_offset"] and self.controller:
+            try:
+                channel = 0  # Assuming channel 0 for calibration
+                slope = self.settings['calibration_gain']
+                offset = self.settings['calibration_offset']
+                self.controller.calibration_coefficient_write(channel, slope, offset)
+                print(f"Calibration coefficients set for channel {channel}: Slope={slope}, Offset={offset}")
+            except HatError as err:
+                print(f"Error setting calibration coefficients: {err}")
+        
 
     def ini_detector(self, controller=None):
         """Detector communication initialization
@@ -99,9 +114,16 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
             False if initialization failed otherwise True
         """
         
-        print('ini detector tried')
-        
+        print('Initializing detector...')
         self.ini_detector_init(slave_controller=controller)
+
+        try:
+            address = select_hat_device(HatIDs.MCC_118)
+            self.controller: mcc118 = mcc118(address)
+        except (HatError, ValueError) as err:
+            print(f"Error initializing MCC 118: {err}")
+            return "Initialization failed", False
+
 
         # if self.is_master:
         #     self.controller = PythonWrapperOfYourInstrument()  #instantiate you driver with whatever arguments are needed
@@ -118,23 +140,33 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         
         self.controller.a_in_scan_start(channel_mask, samples_per_channel, self.settings['scan_rate'], options)
 
-        # # TODO for your custom plugin (optional) initialize viewers panel with the future type of data
-        # self.dte_signal_temp.emit(DataToExport(name='myplugin',
-        #                                        data=[DataFromPlugins(name='Mock1',
-        #                                                             data=[np.array([0]), np.array([0])],
-        #                                                             dim='Data0D',
-        #                                                             labels=['Mock1', 'label2'])]))
+        try:
+            channel = 0  # Assuming channel 0 for initial calibration
+            slope = self.settings['calibration_gain']
+            offset = self.settings['calibration_offset']
+            self.controller.calibration_coefficient_write(channel, slope, offset)
+            print(f"Initial calibration coefficients set for channel {channel}: Slope={slope}, Offset={offset}")
+        except HatError as err:
+            print(f"Error during initial calibration: {err}")
+
+        # TODO for your custom plugin (optional) initialize viewers panel with the future type of data
+        self.dte_signal_temp.emit(DataToExport(name='MCC118test',
+                                               data=[DataFromPlugins(name='Mock1',
+                                                                    data=[np.array([0]), np.array([0])],
+                                                                    dim='Data0D',
+                                                                    labels=['Mock1', 'label2'])]))
 
         info = "mcc118 initialized at address 0"
         initialized = self.controller._initialized
-        print(f'initialized = {initialized}')
         return info, initialized
 
     def close(self):
         """Terminate the communication protocol"""
-
-        self.controller.__del__()  # when writing your own plugin replace this line
-        self.emit_status(ThreadCommand('Update_Status', ['close comm']))
+        if self.controller:
+            self.controller.a_in_scan_stop()
+            self.controller.a_in_scan_cleanup()
+            self.controller.__del__()  
+            # self.emit_status(ThreadCommand('Update_Status', ['close comm']))
 
         #  self.controller.your_method_to_terminate_the_communication()  # when writing your own plugin replace this line
 
@@ -149,9 +181,10 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         kwargs: dict
             others optionals arguments
         """
-        
+        if not self.controller:
+            print("Controller not initialized")
+            return
 
-        total_samples_read = 0
         # read_request_size = READ_ALL_AVAILABLE
         read_request_size = 1
 
@@ -160,13 +193,16 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         # samples (up to the default buffer size) be returned.
         timeout = 5.0
 
-        read_result = self.controller.a_in_scan_read_numpy(read_request_size, timeout)
+        try:
+            read_result = self.controller.a_in_scan_read_numpy(read_request_size, timeout)
+        except HatError as err:
+            print(f"Error reading data: {err}")
+            return
 
         y_data = read_result.data  # Single value for 0D viewer
         
         self.dte_signal.emit(DataToExport(name="MCC118test",data=[DataFromPlugins(name="Voltage",data=y_data,dim="Data0D",labels=['hello this is a label'])]))
-        # sleep(0.1)
-
+        
         # synchrone version (blocking function)
         #not sure it is synchrone 
         #self.controller.a_in_scan_start(channel_mask, samples_per_channel, scan_rate,options)
@@ -186,10 +222,12 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
 
     def callback(self):
         """optional asynchrone method called when the detector has finished its acquisition of data"""
-        data_tot = self.controller.your_method_to_get_data_from_buffer()
-        self.dte_signal.emit(DataToExport(name='myplugin',
-                                          data=[DataFromPlugins(name='Mock1', data=data_tot,
-                                                                dim='Data0D', labels=['dat0', 'data1'])]))
+        read_request_size = 1
+        timeout = 5.0
+        data_tot = self.controller.a_in_scan_read_numpy(read_request_size, timeout)
+        self.dte_signal.emit(DataToExport(name='MCC118test',
+                                          data=[DataFromPlugins(name='Voltage1', data=data_tot,
+                                                                dim='Data0D', labels=['je suis aussi un label'])]))
 
     def stop(self):
         """Stop the current grab hardware wise if necessary"""
@@ -197,7 +235,6 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
         self.controller.a_in_scan_stop()
         self.controller.a_in_scan_cleanup()
         self.emit_status(ThreadCommand('Update_Status', ['close comm']))
-        ##############################
         return ''
 
 
