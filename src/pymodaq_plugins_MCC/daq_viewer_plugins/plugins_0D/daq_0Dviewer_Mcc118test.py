@@ -138,8 +138,6 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
 
         print(self.settings['scan_rate'])
         
-        self.controller.a_in_scan_start(channel_mask, samples_per_channel, self.settings['scan_rate'], options)
-
         try:
             channel = 0  # Assuming channel 0 for initial calibration
             slope = self.settings['calibration_gain']
@@ -148,6 +146,8 @@ class DAQ_0DViewer_Mcc118test(DAQ_Viewer_base):
             print(f"Initial calibration coefficients set for channel {channel}: Slope={slope}, Offset={offset}")
         except HatError as err:
             print(f"Error during initial calibration: {err}")
+
+        self.controller.a_in_scan_start(channel_mask, samples_per_channel, self.settings['scan_rate'], options)
 
         # TODO for your custom plugin (optional) initialize viewers panel with the future type of data
         self.dte_signal_temp.emit(DataToExport(name='MCC118test',
